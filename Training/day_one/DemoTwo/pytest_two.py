@@ -1,6 +1,4 @@
-import pytest
-
-from Training.DemoTwo.ClassesUnderTests import Employee
+from Training.day_one.DemoTwo.ClassesUnderTests import Employee
 
 
 def test_method_one():
