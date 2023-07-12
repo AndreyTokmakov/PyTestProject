@@ -1,0 +1,48 @@
+
+name: PyTests
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+
+  # This workflow contains a single job called "unit_tests"
+  unit_tests:
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            # To run for each different python versions: so there will be 4 different run's
+            # python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+
+            python-version: [ "3.7" ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # test our matrix by printing the current Python version
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      #- name: Test with pytest
+      #  run: |
+      #    pytest tests/some_tests.py
