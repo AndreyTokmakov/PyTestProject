@@ -1,0 +1,23 @@
+version: 2.1 # Set the CI version.
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.9
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+      - run:
+          name: install pytest
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install pytest
+
+      - run:
+          name: run tests
+          command: |
+            source venv/bin/activate
+            pytest Training/day_three/Parametrization/test_Palindrome.py
+            pytest Training/day_three/CI/test_Calculator.py
