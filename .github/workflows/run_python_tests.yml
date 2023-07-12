@@ -46,3 +46,4 @@ jobs:
       - name: Test with pytest
         run: |
           pytest Training/day_three/Parametrization/test_Palindrome.py
+          pytest Training/day_three/CI/test_Calculator.py
