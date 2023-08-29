@@ -28,9 +28,10 @@ if __name__ == '__main__':
     # driver = webdriver.Chrome(service=service, options=chrome_options)
 
     with webdriver.Chrome(options=chrome_options) as browser:
-        # browser.get('http://www.google.com/')
-        browser.get("https://www.lambdatest.com")
+        browser.get('http://www.google.com/')
+        # browser.get("https://www.lambdatest.com")
 
+        '''
         browser.find_element(By.NAME, 'li1').click()
         browser.find_element(By.NAME, 'li2').click()
 
@@ -42,7 +43,8 @@ if __name__ == '__main__':
         sleep(5)
 
         browser.find_element(By.ID, 'addbutton').click()
+        '''
 
-        sleep(5)
+        sleep(2)
 
         browser.quit()
