@@ -17,13 +17,14 @@ class Database(metaclass=SingletonMeta):
 
     def __init__(self):
         if not self.connection_string:
-            print('SKIPP')
+            print('SKIPP')  # FIXME
             return
 
         if not self.__engine__:
             self.__engine__ = create_engine(url=f'{self.connection_string}/{self.DB_SCHEMA_NAME}',  echo=False)
             self.validate_scheme(self.connection_string)
-            self.__engine__.execute(f"USE {self.DB_SCHEMA_NAME}")
+
+        self.__engine__.execute(f"USE {self.DB_SCHEMA_NAME}")
 
     @property
     def base(self) -> DeclarativeMeta:

@@ -107,8 +107,7 @@ def load_defaults(database_instance: Database):
         session.commit()
 
 
-def create_triggers(database_instance: Database):
-    # Create a DB trigger:
+def add_triggers_on_changes(database_instance: Database):
     create_on_new_changes_trigger_ddl: DDL = DDL('''\
         CREATE TRIGGER on_new_changes
             AFTER INSERT ON changes
@@ -117,6 +116,10 @@ def create_triggers(database_instance: Database):
             REPLACE INTO audit_logs(table_name,timestamp) VALUES ('changes', CURRENT_TIMESTAMP);
         END;''')
 
+    database_instance.engine.execute(create_on_new_changes_trigger_ddl)
+
+
+def add_triggers_on_new_test_run(database_instance: Database):
     create_on_test_run_trigger_ddl: DDL = DDL('''\
         CREATE TRIGGER on_new_test_run
             AFTER UPDATE ON TestRun
@@ -125,7 +128,6 @@ def create_triggers(database_instance: Database):
             REPLACE INTO audit_logs VALUES ('test_run', CURRENT_TIMESTAMP);
         END;''')
 
-    database_instance.engine.execute(create_on_new_changes_trigger_ddl)
     database_instance.engine.execute(create_on_test_run_trigger_ddl)
 
 
@@ -133,6 +135,7 @@ if __name__ == '__main__':
     db: Database = Database()
     create_tables(db)
     load_defaults(db)
-    create_triggers(db)
+    add_triggers_on_changes(db)
+    add_triggers_on_new_test_run(db)
 
     pass

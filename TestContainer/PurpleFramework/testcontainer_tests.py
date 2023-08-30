@@ -34,6 +34,8 @@ def create_and_check_version():
         version, = result.fetchone()
         print(version)
 
+        engine.dispose()
+
 
 def create_database_test_creation():
     purple_scheme: str = 'purple'
@@ -120,10 +122,10 @@ def select_test_cases():
 if __name__ == '__main__':
     # create_database()
     # create_database_test_creation()
-    # create_and_check_version()
+    create_and_check_version()
 
     # create_table_test()
     # load_default_values_test()
-    test_triggers_on_changes_test()
+    # test_triggers_on_changes_test()
 
     # select_test_cases()
