@@ -3,6 +3,9 @@ import sqlalchemy
 import sqlalchemy as sa
 from sqlalchemy.engine import CursorResult, Result, Engine
 from Database import Database
+from TestContainer.PurpleFramework import tables
+from TestContainer.PurpleFramework.database.Database import Database
+from TestContainer.PurpleFramework.tables import TestCase, TestSuite, TestSuiteToTests, AuditLogs
 
 sql_version: str = 'mysql:8.1.0'
 
@@ -35,7 +38,7 @@ def create_database_test_creation():
     with MySqlContainer(sql_version, MYSQL_USER='root', MYSQL_PASSWORD='root') as mysql:
         engine: Engine = sqlalchemy.create_engine(mysql.get_connection_url())
         Database.create_scheme(mysql.get_connection_url())
-
+    
         inspector = sa.inspect(engine)
         assert 'purple' in inspector.get_schema_names(), "Purple DB scheme has to be created"
 
