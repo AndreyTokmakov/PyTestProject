@@ -11,6 +11,7 @@ def PurpleTest(cls):
 class PyTestClass:
     text: str = None
 
+
     @classmethod
     def setup_class(cls):
         """ setup any state specific to the execution of the given class (which usually contains tests)."""
@@ -33,7 +34,7 @@ class PyTestClass:
         assert "E" in self.text
 
 
-class PyTestClass2:
+class TestClass2:
 
     def __init__(self):
         pass

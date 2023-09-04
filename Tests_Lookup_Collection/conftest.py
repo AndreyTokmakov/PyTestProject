@@ -1,9 +1,11 @@
+import copy
 import inspect
 from typing import List
 
 import pytest
 from _pytest.reports import CollectReport
 from _pytest.nodes import Item
+from _pytest.python import Class, hasinit
 
 
 class CTestFile:
@@ -14,9 +16,14 @@ class CTestFile:
 
 def pytest_collectstart(collector):
     """
-    Collector starts collecting..
+    Collector starts collecting.
     """
-    print(f'\n------> pytest_collectstart:  {collector} ******\n')
+
+    print(f'\n------> pytest_collectstart:  {collector}  {type(collector)} ******\n')
+    if isinstance(collector, Class) and hasinit(collector.obj):
+        print('collector if CLASS and it has __INIT__')
+        collector.__dict__['__test__'] = False
+        # return []
 
 
 def pytest_collect_file(parent, path):
@@ -29,7 +36,7 @@ def pytest_collect_file(parent, path):
 
 
 def pytest_collection_modifyitems(session, config, items: List[Item]):
-    print(f'\n* * * * * pytest_collection_modifyitems * * * *: {items} {type(items[0])}\n')
+    print(f'\n* * * * * pytest_collection_modifyitems * * * *: {config}\n')
     for item in items:
         if "interface" in item.nodeid:
             item.add_marker(pytest.mark.interface)
@@ -47,6 +54,19 @@ def pytest_collectreport(report: CollectReport):
     hook is called after a test collection has been completed, and allows us to access  the results of the collection.
     We can use this hook to inspect the collected tests, or to report any errors or warnings that occurred during collection.
     """
+
+    '''
+    if report.result:
+        result_copy = copy.copy(report.result)
+        report.result.clear()
+        for item in result_copy:
+            if 'TestClass2' not in str(item):
+                report.result.append(item)
+
+    if 'TestClass2' in str(report.nodeid):
+        print('====== TestClass-2 =====')
+    '''
+
     print(f'\n****** pytest_collectreport:  {report} {type(report)} ******')
     print('\n\t\t\tresult  :', report.result)
     print('\n\t\t\tnodeid  :', report.nodeid)
@@ -59,7 +79,15 @@ def pytest_itemcollected(item: Item):
     A hook that called for each collected node
     Just for reporting ??
     """
-    print(f'\n* * * * * pytest_itemcollected* * * *: {item.name} {item.location} {item.fspath}\n')
+
+    print('\n', '===' * 50, '\n', '\t' * 7, 'pytest_itemcollected\n', '===' * 50, '\n', sep='')
+    print(f'\npytest_itemcollected* * * *: {item.name} {item.location} {item.fspath}\n')
+
+    print(item.parent, type(item.parent))
+    if isinstance(item.parent, Class):
+        print('Parent if CLASS')
+
+    print('\n', '===' * 50, '\n')
     pass
 
 
