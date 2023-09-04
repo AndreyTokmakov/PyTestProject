@@ -1,12 +1,8 @@
+import pytest
 
 
-class PyTestClass:
-    '''
-    def __init__(self):
-        pass
-    '''
-
-    text: str = None
+@pytest.mark.webtest
+class TestWeb:
 
     @classmethod
     def setup_class(cls):
@@ -19,12 +15,16 @@ class PyTestClass:
         """ teardown any state that was previously setup with a call to setup_class. """
         print('\n', '===' * 50, '\n', '\t' * 7, 'Class TeadDown\n', '===' * 50, sep='')
 
-    def test_one(self):
-        # self.text = 'TEST'
-        print(f'\ntest_one\n')
-        assert "T" in self.text
+    def test_startup(self):
+        print('\n test_startup\n')
 
-    def test_two(self):
-        # self.text = 'TEST'
-        print(f'\ntest_two\n')
-        assert "E" in self.text
+    def test_startup_and_more(self):
+        print('\n test_startup_and_more\n')
+
+
+class TestCase:
+
+    __test__ = False
+
+    def __init__(self):
+        print('* * * TestCase * * ')
