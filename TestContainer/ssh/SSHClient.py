@@ -98,7 +98,7 @@ class SSHClient(object):
     def run_executable(self, cmd: str, timeout: float = 60.0) -> Tuple[str, int]:
         with SSHClient.ConnectionContext(self):
             command, output = bytes(f'{cmd}\n', encoding=SSHClient.ENCODING), ""
-            exit_status: int = -1
+            exit_status: int = 0
             with self.client.invoke_shell() as shell:
                 shell.send(command)
                 shell.settimeout(self.RECV_SOCKET_TIMEOUT)
@@ -108,11 +108,7 @@ class SSHClient(object):
                     try:
                         output += shell.recv(self.RECV_BUFFER_SIZE).decode(SSHClient.ENCODING)
                     except socket.timeout:
-                        continue
-                try:
-                    exit_status = shell.recv_exit_status()
-                except socket.timeout:
-                    pass
+                        break
 
             return output, exit_status
 
