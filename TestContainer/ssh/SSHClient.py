@@ -2,7 +2,7 @@ from __future__ import annotations
 import socket
 import time
 from contextlib import ContextDecorator
-from typing import Tuple
+from typing import Tuple, Any
 
 import paramiko
 from scp import SCPClient
@@ -45,7 +45,7 @@ class SSHClient(object):
         # self.status = None
 
         self.client: paramiko.SSHClient = paramiko.SSHClient()
-        self.client.load_system_host_keys()
+        # self.client.load_system_host_keys()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
     @property
@@ -53,13 +53,13 @@ class SSHClient(object):
         return self.hostname
 
     # TODO: Refactor
-    def connect(self) -> None:
-        self.client.connect(hostname=self.hostname,
-                            username=self.username,
-                            password=self.password,
-                            port=self.port,
-                            look_for_keys=False,
-                            allow_agent=False)
+    def connect(self) -> Any:
+        return self.client.connect(hostname=self.hostname,
+                                   username=self.username,
+                                   password=self.password,
+                                   port=self.port,
+                                   look_for_keys=False,
+                                   allow_agent=False)
 
     def close(self) -> None:
         self.client.close()
@@ -108,7 +108,7 @@ class SSHClient(object):
                     try:
                         output += shell.recv(self.RECV_BUFFER_SIZE).decode(SSHClient.ENCODING)
                     except socket.timeout:
-                        break
+                        continue
 
             return output, exit_status
 
