@@ -24,7 +24,7 @@ class TestSSHClient:
         cls.client = SSHClient(hostname='0.0.0.0', username=cls.USER_NAME, password=cls.PASSWORD, port=cls.PORT)
 
         # FIXME: Solves the sometimes slow docker sshd container start-up
-        time.sleep(1)
+        time.sleep(2)
 
     @classmethod
     def teardown_class(cls):
