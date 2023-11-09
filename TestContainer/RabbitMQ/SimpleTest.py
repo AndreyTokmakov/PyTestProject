@@ -1,7 +1,7 @@
 import datetime
 import time
 from threading import Thread
-from typing import Dict
+from typing import Dict, List
 
 import pika
 from pika.exchange_type import ExchangeType
@@ -14,27 +14,10 @@ from TestContainer.RabbitMQ.message_broker.Consumer_Thread_Queue import MessageB
 from TestContainer.RabbitMQ.message_broker.PubSubParams import Routing, Broker, PubSubParams
 
 
-# Just to support option to limit number of messages to received
-class MessageBus_ForTest(MessageBus):
-
-    def __init__(self, callback, messages_count: int = 1) -> None:
-        super().__init__(callback)
-        self.messages_count: int = messages_count
-        self.messages_received: int = 0
-
-    def message_received(self,
-                         channel: BlockingChannel,
-                         method: Basic.Deliver,
-                         properties: BasicProperties,
-                         body: bytes) -> None:
-        super().message_received(channel, method, properties, body)
-        self.event.set()
-        channel.stop_consuming()
-
-
-def process_message(msg) -> None:
+def process_message(msg) -> bool:
     print("--" * 100)
     print(msg)
+    return True
 
 
 def message_received(channel: BlockingChannel,
@@ -42,7 +25,7 @@ def message_received(channel: BlockingChannel,
                      properties: BasicProperties,
                      body: bytes):
     process_message(body.decode(encoding='utf-8'))
-    channel.stop_consuming()
+    # channel.stop_consuming()
 
 
 def check_params():
@@ -136,9 +119,19 @@ def publish_consume_lib():
         broker_private: Broker = Broker(host=connection_params.host, port=connection_params.port,
                                         username=credentials.username, password=credentials.password)
         params: PubSubParams = PubSubParams(broker_private, private_events)
+        messages: List = []
+
+        counter: int = 0
+
+        def callback(msg) -> bool:
+            messages.append(msg)
+            nonlocal counter
+            counter += 1
+
+            return 2 > counter
 
         def consume_thread():
-            consumer: MessageBus_ForTest = MessageBus_ForTest(callback=process_message)
+            consumer: MessageBus = MessageBus(callback=callback)
             consumer.add_consumers([params])
             consumer.start()
 
@@ -146,13 +139,15 @@ def publish_consume_lib():
             time.sleep(0.1)
             msg: Dict = {'service': 'TestScheduler', 'user': 'root', 'password': '12345'}
             MessageBus.publish(msg, params)
+            MessageBus.publish(msg, params)
 
         t1: Thread = Thread(target=consume_thread)
         t2: Thread = Thread(target=publish_thread)
         t1.start()
         t2.start()
-
         t1.join()
+
+        print(messages)
 
 
 if __name__ == '__main__':

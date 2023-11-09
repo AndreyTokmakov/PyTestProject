@@ -1,24 +1,23 @@
-import sys
 import pika
 
-from collections.abc import Callable
+from pika.exceptions import AMQPError
 from pika import BasicProperties
 from pika.adapters.blocking_connection import BlockingChannel
 from pika.spec import Basic
 from queue import Empty, Queue
 from threading import Thread, Event
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Tuple, Callable
 from message_broker.PubSubParams import PubSubParams, Broker, Routing
 from message_broker.Message import MessageBuilder, Message
 
 
 class MessageBus(object):
+    QUEUE_POLL_TIMEOUT: float = 0.5
 
-    def __init__(self, callback) -> None:
-        self.message_queue: Queue = Queue()
+    def __init__(self, callback: Callable[[Any], bool]) -> None:
+        self.message_queue: Queue[Tuple[Any, BlockingChannel]] = Queue()
         self.consumers: List[Thread] = []
-        self.callback: Callable[Any, None] = callback
-        self.event: Event = Event()
+        self.callback: Callable[[Any], bool] = callback
 
     def add_consumers(self, pub_sub_params: List[PubSubParams]) -> None:
         for param in pub_sub_params:
@@ -31,13 +30,18 @@ class MessageBus(object):
                          body: bytes) -> None:
 
         msg: Message = MessageBuilder.extract_message(properties, body)
-        self.message_queue.put([msg.data, msg.headers, [method.exchange, method.routing_key]])
+        self.message_queue.put(([msg.data, msg.headers, [method.exchange, method.routing_key]], channel))
 
     def process_queue(self) -> None:
-        while not self.event.is_set():
+        while True:
             try:
-                item: Any = self.message_queue.get(timeout=0.5)
-                self.callback(item)
+                payload, channel = self.message_queue.get(timeout=MessageBus.QUEUE_POLL_TIMEOUT)
+                if not self.callback(payload):
+                    try:
+                        channel.stop_consuming()
+                    except AMQPError as _:
+                        pass
+                    break
             except Empty:
                 continue
 
@@ -55,13 +59,15 @@ class MessageBus(object):
                                      durable=routing.durable,
                                      exchange_type=routing.exchange_type.value)
 
-            result = channel.queue_declare(queue=routing.topic, exclusive=False)
+            result = channel.queue_declare(queue=routing.topic, exclusive=False, durable=routing.durable)
             channel.queue_bind(exchange=routing.exchange, queue=routing.topic)
             channel.basic_consume(queue=routing.topic,
                                   on_message_callback=self.message_received,
                                   auto_ack=True)
-
-            channel.start_consuming()
+            try:
+                channel.start_consuming()
+            except AMQPError as _:
+                pass
 
     def start(self):
         for thread in self.consumers:
@@ -88,5 +94,3 @@ class MessageBus(object):
                                   routing_key=routing.topic,
                                   properties=pika.BasicProperties(headers=msg.headers),
                                   body=msg.data)
-
-

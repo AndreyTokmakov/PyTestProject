@@ -6,8 +6,8 @@ from typing import Dict
 from pgpy import PGPKey
 from pika import BasicProperties
 
-from TestContainer.RabbitMQ.message_broker.PubSubParams import PubSubParams, Broker, BrokerType
-from TestContainer.RabbitMQ.message_broker.PGPUtils import PGPUtils
+from message_broker.PubSubParams import PubSubParams, Broker, BrokerType
+from message_broker.PGPUtils import PGPUtils
 
 
 class Message(object):
