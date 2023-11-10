@@ -19,3 +19,4 @@ class TestArpPoisoning:
 
     def test(self):
         print("TestArpPoisoning")
+        allure.dynamic.title("It is renamed test")

@@ -1,5 +1,6 @@
 import subprocess
 import sys
+import pytest
 from typing import Tuple
 
 
@@ -28,11 +29,14 @@ def run_command(cmd: str, print_output: bool = True) -> Tuple[str, int]:
         return f"Can't run process. Error code = {exc}", -1
 
 
+
 if __name__ == '__main__':
-    params = ['python -m pytest',
-              '-sv',
-              'combine/ArpPoisoning.py',
-              '--alluredir combine/results'
-              ]
+    params = [
+        'python -m pytest',
+        '-sv',
+        'combine/ArpPoisoning.py',
+        '--alluredir /home/andtokm/DiskS/ProjectsUbuntu/PyTestProjects/Reports_Allure/combine/results'
+    ]
 
     output, code = run_command(" ".join(params))
+    # exit_code = pytest.main(params)
