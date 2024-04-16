@@ -29,7 +29,6 @@ def run_command(cmd: str, print_output: bool = True) -> Tuple[str, int]:
         return f"Can't run process. Error code = {exc}", -1
 
 
-
 if __name__ == '__main__':
     params = [
         'python -m pytest',
